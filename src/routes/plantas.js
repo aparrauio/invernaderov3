@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Planta = require("../models/planta");
 const Riego = require("../models/riego");
+const { validarPlanta } = require("../dominio/validaciones");
 
 const router = express.Router();
 
@@ -15,6 +16,15 @@ router.post("/", async (req, res) => {
     enReposo,
     cuidadosEspeciales,
   } = req.body ?? {};
+  const detalles = validarPlanta({
+    nombre,
+    especie,
+    ubicacion,
+    intervaloRiegoDias,
+  });
+  if (detalles.length > 0) {
+    return res.status(400).json({ error: "Datos no válidos", detalles });
+  }
   const planta = await Planta.create({
     nombre,
     especie,
