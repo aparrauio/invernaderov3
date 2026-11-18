@@ -2,7 +2,7 @@
 
 Historia y criterios: [docs/backlog/E1-plantas-y-riegos.md](../../../backlog/E1-plantas-y-riegos.md) (HU-1.8, CA-1.8.1 a CA-1.8.7).
 
-**Estado:** aprobados por el usuario el 2026-11-18. La spec 05 todavía no está escrita.
+**Estado:** aprobados por el usuario el 2026-11-18. La spec 07 todavía no está escrita; su tarjeta está en `docs/tablero/tarjetas.md`.
 
 Baja fidelidad, en escala de grises. Los textos son los de los criterios y de `DESIGN.md`. Los colores, las fuentes y los tamaños finales los decide `DESIGN.md`, no estos dibujos.
 
