@@ -1,10 +1,17 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const Planta = require("../models/planta");
 const Riego = require("../models/riego");
-const { validarPlanta } = require("../dominio/validaciones");
+const { validarPlanta, esIdValido } = require("../dominio/validaciones");
 
 const router = express.Router();
+
+// Mismo 400 para la planta y para su historial.
+const ID_NO_VALIDO = {
+  error: "Datos no válidos",
+  detalles: [
+    { campo: "id", mensaje: "La planta no tiene un identificador válido" },
+  ],
+};
 
 router.post("/", async (req, res) => {
   // Solo se toman los campos que el cuidador puede fijar: createdAt lo pone el sistema.
@@ -41,15 +48,22 @@ router.get("/", async (req, res) => {
   res.json(plantas);
 });
 
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!esIdValido(id)) {
+    return res.status(400).json(ID_NO_VALIDO);
+  }
+  const planta = await Planta.findById(id);
+  if (!planta) {
+    return res.status(404).json({ error: "Planta no encontrada" });
+  }
+  res.json(planta);
+});
+
 router.get("/:id/riegos", async (req, res) => {
   const { id } = req.params;
-  if (!mongoose.isObjectIdOrHexString(id)) {
-    return res.status(400).json({
-      error: "Datos no válidos",
-      detalles: [
-        { campo: "id", mensaje: "La planta no tiene un identificador válido" },
-      ],
-    });
+  if (!esIdValido(id)) {
+    return res.status(400).json(ID_NO_VALIDO);
   }
   if (!(await Planta.exists({ _id: id }))) {
     return res.status(404).json({ error: "Planta no encontrada" });

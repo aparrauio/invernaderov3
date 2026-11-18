@@ -108,3 +108,11 @@ function validarRiego(datos, ahora) {
 }
 
 module.exports = { validarPlanta, validarRiego };
+// Identificador de MongoDB: 24 caracteres hexadecimales.
+const ID_VALIDO = /^[0-9a-f]{24}$/i;
+
+function esIdValido(valor) {
+  return typeof valor === "string" && ID_VALIDO.test(valor);
+}
+
+module.exports = { validarPlanta, esIdValido };
