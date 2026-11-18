@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { listarPlantas, registrarPlanta, repartirErrores } from "../api.js";
 import Campo from "../componentes/Campo.jsx";
 import ListaVacia from "../componentes/ListaVacia.jsx";
 import Mensaje from "../componentes/Mensaje.jsx";
+import RiegoRapido from "../componentes/RiegoRapido.jsx";
 
 const CAMPOS = ["nombre", "especie", "ubicacion", "intervaloRiegoDias"];
 const VACIO = {
@@ -20,6 +21,37 @@ export default function Plantas({ alAbrir }) {
   const [exito, setExito] = useState("");
   const [enviando, setEnviando] = useState(false);
   const primerCampo = useRef(null);
+  // Riego rápido (spec 07): un solo panel abierto y un mensaje de éxito por fila.
+  const [panelAbierto, setPanelAbierto] = useState(null); // id de la planta
+  const [riegoGuardado, setRiegoGuardado] = useState(null); // { id, texto }
+  const botonesRiego = useRef(new Map());
+  const devolverFoco = useRef(null);
+
+  // Al cerrar un panel, el foco vuelve al botón «Registrar riego» de esa fila.
+  useEffect(() => {
+    if (panelAbierto === null && devolverFoco.current) {
+      botonesRiego.current.get(devolverFoco.current)?.focus();
+      devolverFoco.current = null;
+    }
+  }, [panelAbierto]);
+
+  function abrirPanel(id) {
+    setRiegoGuardado(null);
+    setPanelAbierto(id);
+  }
+
+  function cerrarPanel(id) {
+    devolverFoco.current = id;
+    setPanelAbierto(null);
+  }
+
+  function riegoRegistrado(planta) {
+    setRiegoGuardado({
+      id: planta._id,
+      texto: `Riego guardado para ${planta.nombre}.`,
+    });
+    cerrarPanel(planta._id);
+  }
 
   useEffect(() => {
     listarPlantas()
@@ -97,30 +129,70 @@ export default function Plantas({ alAbrir }) {
                 <th scope="col">Especie</th>
                 <th scope="col">Ubicación</th>
                 <th scope="col">Riego cada</th>
+                <th scope="col">
+                  <span className="solo-lector">Acciones</span>
+                </th>
               </tr>
             </thead>
             <tbody>
               {plantas.map((planta) => (
-                <tr key={planta._id}>
-                  <td data-etiqueta="Nombre">
-                    <a
-                      href={`#planta-${planta._id}`}
-                      className="enlace-planta"
-                      onClick={(evento) => {
-                        evento.preventDefault();
-                        alAbrir(planta);
-                      }}
-                    >
-                      {planta.nombre}
-                    </a>
-                  </td>
-                  <td data-etiqueta="Especie">{planta.especie}</td>
-                  <td data-etiqueta="Ubicación">{planta.ubicacion}</td>
-                  <td data-etiqueta="Riego cada">
-                    {planta.intervaloRiegoDias}{" "}
-                    {planta.intervaloRiegoDias === 1 ? "día" : "días"}
-                  </td>
-                </tr>
+                <Fragment key={planta._id}>
+                  <tr
+                    className={
+                      panelAbierto === planta._id ? "fila-con-panel" : undefined
+                    }
+                  >
+                    <td data-etiqueta="Nombre">
+                      <a
+                        href={`#planta-${planta._id}`}
+                        className="enlace-planta"
+                        onClick={(evento) => {
+                          evento.preventDefault();
+                          alAbrir(planta);
+                        }}
+                      >
+                        {planta.nombre}
+                      </a>
+                    </td>
+                    <td data-etiqueta="Especie">{planta.especie}</td>
+                    <td data-etiqueta="Ubicación">{planta.ubicacion}</td>
+                    <td data-etiqueta="Riego cada">
+                      {planta.intervaloRiegoDias}{" "}
+                      {planta.intervaloRiegoDias === 1 ? "día" : "días"}
+                    </td>
+                    <td className="celda-accion">
+                      {riegoGuardado?.id === planta._id && (
+                        <Mensaje tipo="exito">{riegoGuardado.texto}</Mensaje>
+                      )}
+                      {panelAbierto !== planta._id && (
+                        <button
+                          type="button"
+                          className="boton-secundario"
+                          aria-label={`Registrar riego para ${planta.nombre}`}
+                          ref={(boton) => {
+                            if (boton)
+                              botonesRiego.current.set(planta._id, boton);
+                            else botonesRiego.current.delete(planta._id);
+                          }}
+                          onClick={() => abrirPanel(planta._id)}
+                        >
+                          Registrar riego
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                  {panelAbierto === planta._id && (
+                    <tr className="fila-panel">
+                      <td colSpan={5}>
+                        <RiegoRapido
+                          planta={planta}
+                          alGuardar={() => riegoRegistrado(planta)}
+                          alCancelar={() => cerrarPanel(planta._id)}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>
