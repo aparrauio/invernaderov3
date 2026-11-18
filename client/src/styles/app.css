@@ -267,6 +267,94 @@ form {
   border-radius: var(--radio-tarjeta);
 }
 
+/* Riego rápido (spec 07) */
+.boton-enlace {
+  min-height: 44px;
+  padding: var(--espacio-2) var(--espacio-3);
+  border: none;
+  background: none;
+  color: var(--color-acento);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.boton-enlace:disabled,
+.boton-secundario:disabled {
+  color: var(--color-texto-secundario);
+  border-color: var(--color-borde-campo);
+  cursor: progress;
+}
+
+.campo input:disabled {
+  background: var(--color-fondo);
+  color: var(--color-texto-secundario);
+}
+
+.tabla-plantas .celda-accion {
+  text-align: right;
+}
+
+.celda-accion .mensaje {
+  margin-bottom: var(--espacio-2);
+  text-align: left;
+}
+
+.fila-con-panel td {
+  border-bottom: none;
+}
+
+.tabla-plantas .fila-panel td {
+  padding-top: 0;
+  border-top: none;
+}
+
+.panel-riego {
+  display: grid;
+  grid-template-columns: minmax(0, 240px) auto;
+  grid-template-areas:
+    "titulo titulo"
+    "campo acciones";
+  justify-content: start;
+  column-gap: var(--espacio-5);
+  row-gap: var(--espacio-4);
+  padding: var(--espacio-5);
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-tarjeta);
+  text-align: left;
+}
+
+.panel-riego-titulo {
+  grid-area: titulo;
+  margin: 0;
+  font-family: var(--fuente-texto);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.panel-riego-campo {
+  grid-area: campo;
+}
+
+/* Solo ocupa una fila cuando hay mensajes. */
+.panel-riego-mensajes {
+  grid-column: 1 / -1;
+}
+
+.panel-riego-mensajes .mensaje {
+  margin-bottom: 0;
+}
+
+.panel-riego-acciones {
+  grid-area: acciones;
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  /* Alinea los botones con la caja del campo, bajo su etiqueta. */
+  margin-top: var(--espacio-6);
+}
+
 /* Móvil: cada fila de la tabla se convierte en una tarjeta */
 @media (max-width: 639px) {
   .tabla-plantas,
@@ -298,7 +386,7 @@ form {
     border: none;
   }
 
-  .tabla-plantas td:not(:first-child)::before {
+  .tabla-plantas td[data-etiqueta]:not(:first-child)::before {
     content: attr(data-etiqueta) ": ";
     color: var(--color-texto-secundario);
     font-size: 14px;
@@ -306,5 +394,47 @@ form {
 
   .tabla-plantas td:first-child .enlace-planta {
     font-size: 18px;
+  }
+
+  /* Riego rápido: la acción ocupa todo el ancho y el panel queda dentro de la tarjeta. */
+  .tabla-plantas .celda-accion {
+    padding-top: var(--espacio-3);
+    text-align: left;
+  }
+
+  .celda-accion .boton-secundario {
+    width: 100%;
+  }
+
+  .tabla-plantas .fila-con-panel {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+    border-radius: var(--radio-tarjeta) var(--radio-tarjeta) 0 0;
+  }
+
+  .tabla-plantas .fila-panel {
+    padding-top: var(--espacio-3);
+    border-top: none;
+    border-radius: 0 0 var(--radio-tarjeta) var(--radio-tarjeta);
+  }
+
+  .tabla-plantas .fila-panel td {
+    padding: 0;
+  }
+
+  /* En el móvil se sigue el orden del HTML: campo, mensajes y acciones. */
+  .panel-riego {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-4);
+    padding: var(--espacio-4);
+  }
+
+  .panel-riego-acciones {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--espacio-1);
+    margin-top: 0;
   }
 }
