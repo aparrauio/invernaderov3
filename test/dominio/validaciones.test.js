@@ -1,6 +1,6 @@
 const { describe, test } = require("node:test");
 const assert = require("node:assert/strict");
-const { validarPlanta } = require("../../src/dominio/validaciones");
+const { validarPlanta, esIdValido } = require("../../src/dominio/validaciones");
 
 const ENTERO = "El intervalo de riego debe ser un número entero de días";
 
@@ -101,6 +101,35 @@ describe("validarPlanta", () => {
         validarPlanta(datos).map((d) => d.campo),
         ["nombre", "especie", "ubicacion", "intervaloRiegoDias"],
       );
+    }
+  });
+});
+
+describe("esIdValido", () => {
+  test("CA-06.1: 24 caracteres hexadecimales es un id válido", () => {
+    assert.equal(esIdValido("665f1c2a9b1e8a0012345678"), true);
+  });
+
+  test("las mayúsculas también son hexadecimales", () => {
+    assert.equal(esIdValido("665F1C2A9B1E8A0012345678"), true);
+  });
+
+  test("CA-06.1: «123», texto vacío y null no son ids válidos", () => {
+    for (const valor of ["123", "", null]) {
+      assert.equal(esIdValido(valor), false, `${JSON.stringify(valor)}`);
+    }
+  });
+
+  test("otros valores no válidos", () => {
+    for (const valor of [
+      undefined,
+      "665f1c2a9b1e8a00123456789",
+      "665f1c2a9b1e8a001234567z",
+      " 665f1c2a9b1e8a0012345678",
+      123,
+      { id: "665f1c2a9b1e8a0012345678" },
+    ]) {
+      assert.equal(esIdValido(valor), false, `${JSON.stringify(valor)}`);
     }
   });
 });
