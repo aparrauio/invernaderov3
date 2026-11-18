@@ -3,8 +3,8 @@ const assert = require("node:assert/strict");
 const {
   validarPlanta,
   validarRiego,
+  esIdValido,
 } = require("../../src/dominio/validaciones");
-const { validarPlanta, esIdValido } = require("../../src/dominio/validaciones");
 
 const ENTERO = "El intervalo de riego debe ser un número entero de días";
 
@@ -236,6 +236,10 @@ describe("validarRiego", () => {
         validarRiego(datos, AHORA).map((d) => d.campo),
         ["planta", "cantidadMl"],
       );
+    }
+  });
+});
+
 describe("esIdValido", () => {
   test("CA-06.1: 24 caracteres hexadecimales es un id válido", () => {
     assert.equal(esIdValido("665f1c2a9b1e8a0012345678"), true);
