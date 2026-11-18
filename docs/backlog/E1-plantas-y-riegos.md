@@ -335,6 +335,60 @@ Como cuidador, quiero corregir o borrar un riego mal registrado, para que un err
 | 4.4 Historial de riegos | HU-1.4 |
 | 4.5 Lista de plantas | HU-1.5 |
 
+## Historias nuevas
+
+### HU-1.8 · Registrar un riego rápido desde la lista
+Como cuidador, quiero registrar un riego desde la lista de plantas sin abrir su detalle, para anotarlo en segundos mientras recorro las mesas.
+
+- **Estado:** pendiente de spec. No se implementa hasta que exista en `docs/specs/`.
+- **Alcance:** §4.2, como atajo de la interfaz sobre HU-1.2. No cambia el backend: usa el endpoint existente `POST /api/riegos` (spec 01, X7).
+- **Reglas:** D1, D2, D6 y 6.4 (las mismas de HU-1.2).
+
+**Decisiones del cliente (2026-11-18):**
+- El panel sugiere 500 ml. El cuidador puede cambiar la cantidad antes de guardar.
+- La fecha del riego es siempre hoy. El panel no muestra campo de fecha.
+- No se pide cuidador; el riego queda «sin cuidador». Para indicarlo, el cuidador usa el detalle de la planta.
+- Solo hay un panel abierto a la vez: abrir el de otra planta cierra el anterior.
+- Al guardar con éxito, el panel se cierra.
+- El botón «Guardar riego» es secundario, porque el botón primario de la pantalla sigue siendo «Registrar planta» (DESIGN.md, principio 2).
+
+**Criterios de aceptación:**
+
+- **CA-1.8.1 · Panel abierto**
+  DADO la lista de plantas con «Helecho Lunar» y «Mandrágora»,
+  CUANDO el cuidador pulsa «Registrar riego» en la fila de «Helecho Lunar»,
+  ENTONCES se abre, dentro de esa fila, un panel con el nombre de la planta, el campo «Cantidad (ml)» con 500 escrito y el foco puesto, la ayuda «Se anota con la fecha de hoy.», el botón secundario «Guardar riego» y la opción «Cancelar». El panel no tiene campos de fecha ni de cuidador. Si después pulsa «Registrar riego» en la fila de «Mandrágora», el panel de «Helecho Lunar» se cierra sin guardar nada y se abre el de «Mandrágora». Si pulsa «Cancelar», el panel se cierra y no se registra ningún riego.
+
+- **CA-1.8.2 · Guardando**
+  DADO el panel de «Helecho Lunar» abierto con 500 ml,
+  CUANDO el cuidador pulsa «Guardar riego» y la respuesta todavía no ha llegado,
+  ENTONCES el botón muestra «Guardando…» y está desactivado, el campo no se puede editar, y otra pulsación no envía un segundo riego. Al terminar, la planta tiene un solo riego nuevo.
+
+- **CA-1.8.3 · Éxito**
+  DADO el panel de «Helecho Lunar» abierto con 500 ml,
+  CUANDO el cuidador pulsa «Guardar riego» y el riego se registra,
+  ENTONCES el panel se cierra, en esa fila aparece el mensaje de éxito «Riego guardado para Helecho Lunar.», y el cuidador sigue en la lista, en la misma posición. Si abre el detalle de la planta, ve al principio del historial un riego con la fecha de hoy, 500 ml y «sin cuidador».
+
+- **CA-1.8.4 · Error de validación junto al campo** (D2, D6)
+  DADO el panel de «Helecho Lunar» abierto,
+  CUANDO el cuidador escribe 0 (o deja el campo vacío, o escribe 2,5) en «Cantidad (ml)» y pulsa «Guardar riego»,
+  ENTONCES el panel sigue abierto y conserva lo que escribió, el campo tiene borde de error, debajo aparece con icono el mensaje correspondiente (por ejemplo, que la cantidad debe ser mayor que 0), y no se registra ningún riego. El mensaje no usa tecnicismos como «400».
+
+- **CA-1.8.5 · Error de conexión**
+  DADO el panel de «Helecho Lunar» abierto con 500 ml y la API apagada o sin red,
+  CUANDO el cuidador pulsa «Guardar riego»,
+  ENTONCES el panel sigue abierto con los 500 ml, aparece dentro del panel el mensaje de error «No pudimos guardar el riego. Revisa tu conexión y vuelve a intentarlo.», el botón «Guardar riego» vuelve a estar activo para reintentar, y no se muestra ningún mensaje de éxito.
+
+- **CA-1.8.6 · Planta que ya no existe** (D1)
+  DADO el panel de una planta que se borró después de cargar la lista,
+  CUANDO el cuidador pulsa «Guardar riego»,
+  ENTONCES el panel muestra «No encontramos esa planta. Puede que se haya borrado.», no se registra ningún riego y el mensaje no se confunde con un error de conexión.
+
+- **CA-1.8.7 · Uso en móvil a 390 px**
+  DADO la lista de plantas en una pantalla de 390 px de ancho, mostrada como tarjetas,
+  CUANDO el cuidador abre el panel de riego rápido de una planta y pasa por los estados anteriores (abierto, guardando, éxito, error de validación y error de conexión),
+  ENTONCES el panel se ve dentro de la tarjeta de esa planta, el campo ocupa todo el ancho y abre el teclado numérico, «Registrar riego», «Guardar riego» y «Cancelar» tienen al menos 44 px de alto, ningún mensaje se corta, y la pantalla no tiene desplazamiento horizontal en ningún estado.
+
 ## Decisiones del cliente (2026-11-04)
 
 | # | Decisión |
